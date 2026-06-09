@@ -102,7 +102,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen w-full bg-[#F8FAFC]">
         <AppSidebar />
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 h-screen overflow-y-auto">
           <Outlet />
         </main>
       </div>
