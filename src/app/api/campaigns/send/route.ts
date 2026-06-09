@@ -29,6 +29,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, warning: "No messages found" });
     }
 
+    // Fetch customer names to send to channel service
+    const customerIds = messages.map(m => m.customer_id);
+    const { data: customers } = await supabase
+      .from("customers")
+      .select("id, name")
+      .in("id", customerIds);
+    
+    const customerMap = new Map(customers?.map(c => [c.id, c.name]));
+
     // 3. Update sent_at timestamp
     const now = new Date().toISOString();
     await supabase
@@ -43,12 +52,13 @@ export async function POST(req: Request) {
     // Send asynchronously so we don't block the request for huge lists
     Promise.all(messages.map(async (msg) => {
       try {
+        const customerName = customerMap.get(msg.customer_id) || msg.customer_id;
         await fetch(`${CHANNEL_SERVICE_URL}/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             messageId: msg.id,
-            recipient: msg.customer_id, // Usually would expand this, but ID works for tracking
+            recipient: customerName,
             content: msg.content,
             channel: msg.channel,
             callbackUrl: `${APP_URL}/api/webhooks/delivery`
