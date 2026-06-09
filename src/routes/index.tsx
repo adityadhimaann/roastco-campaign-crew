@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   Sparkles,
   Send,
-  Bot,
   Users,
   MessageCircle,
   Pencil,
