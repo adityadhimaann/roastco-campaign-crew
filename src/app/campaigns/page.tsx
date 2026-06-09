@@ -187,8 +187,11 @@ export default function CampaignsPage() {
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[600px]">
           {/* Chat Box (LEFT) */}
-          <div className="lg:col-span-3 relative h-[600px] lg:h-auto">
-            <div className="absolute inset-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="lg:col-span-3 relative h-[600px] lg:h-auto group">
+            {/* Animated Dark Border */}
+            <div className="absolute -inset-[2px] bg-gradient-to-r from-slate-900 via-slate-600 to-slate-900 rounded-[14px] opacity-70 animate-pulse z-0"></div>
+
+            <div className="absolute inset-0 bg-white rounded-xl flex flex-col z-10 overflow-hidden shadow-sm">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <div className="h-8 w-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
