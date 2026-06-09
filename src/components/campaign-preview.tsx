@@ -34,9 +34,9 @@ export function CampaignPreview() {
             <MessageCircle className="h-3.5 w-3.5" /> Draft Message
           </div>
           <div className="mt-2 bg-[#DCF8C6] text-slate-800 text-sm leading-relaxed rounded-2xl rounded-tl-sm px-4 py-3">
-            Hey Sarah! ☕ We miss you at Roast &amp; Co. It's been a while since your last
-            visit. Come back with 15% off your next order — use code{" "}
-            <strong>COMEBACK15</strong>. Valid for 7 days!
+            Hey Sarah! ☕ We miss you at Roast &amp; Co. It's been a while since your last visit.
+            Come back with 15% off your next order — use code <strong>COMEBACK15</strong>. Valid for
+            7 days!
           </div>
           <p className="mt-2 text-xs text-slate-400">Message personalized per customer</p>
         </div>
@@ -45,9 +45,7 @@ export function CampaignPreview() {
 
         {/* Channel */}
         <div>
-          <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-            Channel
-          </div>
+          <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">Channel</div>
           <div className="mt-2 flex gap-2">
             <button className="px-3 py-1.5 rounded-md text-xs font-medium bg-[#25D366]/10 text-[#128C7E] border border-[#25D366]/30">
               WhatsApp

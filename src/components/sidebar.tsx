@@ -19,12 +19,7 @@ export function AppSidebar() {
   return (
     <>
       {/* Spacer reserves layout width */}
-      <div
-        className={cn(
-          "shrink-0 transition-[width] duration-200",
-          open ? "w-60" : "w-16",
-        )}
-      />
+      <div className={cn("shrink-0 transition-[width] duration-200", open ? "w-60" : "w-16")} />
 
       <aside
         className={cn(
@@ -32,7 +27,12 @@ export function AppSidebar() {
           open ? "w-60" : "w-16",
         )}
       >
-        <div className={cn("py-6 flex items-center gap-2.5 border-b border-sidebar-border h-[85px]", open ? "px-6" : "px-0 justify-center")}>
+        <div
+          className={cn(
+            "py-6 flex items-center gap-2.5 border-b border-sidebar-border h-[85px]",
+            open ? "px-6" : "px-0 justify-center",
+          )}
+        >
           {open ? (
             <>
               <div className="h-9 w-9 shrink-0 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
@@ -40,7 +40,9 @@ export function AppSidebar() {
               </div>
               <div className="flex-1 overflow-hidden">
                 <div className="font-semibold tracking-tight truncate">Roast &amp; Co.</div>
-                <div className="text-[11px] text-sidebar-foreground/60 -mt-0.5 truncate">Campaign CRM</div>
+                <div className="text-[11px] text-sidebar-foreground/60 -mt-0.5 truncate">
+                  Campaign CRM
+                </div>
               </div>
               <button
                 onClick={() => setOpen(false)}

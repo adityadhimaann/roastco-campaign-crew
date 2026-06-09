@@ -20,7 +20,7 @@ function initials(name: string) {
 export default async function CustomersPage() {
   const { data: customersData, error } = await supabase
     .from("customers")
-    .select("*, orders(amount, created_at)")
+    .select("*, orders(amount, ordered_at)")
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -31,7 +31,7 @@ export default async function CustomersPage() {
     const totalOrders = c.orders?.length || 0;
     const spent = c.orders?.reduce((acc: number, o: any) => acc + Number(o.amount), 0) || 0;
     
-    const lastOrderDates = c.orders?.map((o: any) => new Date(o.created_at).getTime()) || [];
+    const lastOrderDates = c.orders?.map((o: any) => new Date(o.ordered_at).getTime()) || [];
     const maxDate = lastOrderDates.length ? Math.max(...lastOrderDates) : null;
     const daysAgo = maxDate ? Math.floor((Date.now() - maxDate) / (1000 * 60 * 60 * 24)) : null;
     

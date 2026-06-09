@@ -9,19 +9,14 @@ export type Msg = {
 
 export function ChatMessage({ message }: { message: Msg }) {
   return (
-    <div
-      className={cn(
-        "flex",
-        message.from === "user" ? "justify-end" : "justify-start"
-      )}
-    >
+    <div className={cn("flex", message.from === "user" ? "justify-end" : "justify-start")}>
       <div className="flex flex-col max-w-[75%]">
         <div
           className={cn(
             "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
             message.from === "ai"
               ? "bg-white text-slate-800 rounded-bl-sm border border-slate-200/80"
-              : "bg-[#DCF8C6] text-slate-800 rounded-br-sm"
+              : "bg-[#DCF8C6] text-slate-800 rounded-br-sm",
           )}
         >
           {message.text}
@@ -35,7 +30,7 @@ export function ChatMessage({ message }: { message: Msg }) {
           <span
             className={cn(
               "block text-[10px] mt-1 text-right",
-              message.from === "ai" ? "text-slate-400" : "text-emerald-700/70"
+              message.from === "ai" ? "text-slate-400" : "text-emerald-700/70",
             )}
           >
             {message.time}

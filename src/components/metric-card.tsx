@@ -13,15 +13,8 @@ export function MetricCard({ label, value, change, trend, color }: MetricProps) 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-          {label}
-        </span>
-        <span
-          className={cn(
-            "h-7 w-7 rounded-md inline-flex items-center justify-center",
-            color
-          )}
-        >
+        <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</span>
+        <span className={cn("h-7 w-7 rounded-md inline-flex items-center justify-center", color)}>
           {trend === "up" ? (
             <ArrowUpRight className="h-3.5 w-3.5" />
           ) : (

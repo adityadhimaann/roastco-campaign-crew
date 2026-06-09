@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     // 1. Create campaign
     const { data: campaign, error } = await supabase
       .from('campaigns')
-      .insert({ name, goal, segment_filters, status: 'sending' })
+      .insert({ name, goal, segment_filters, status: 'sending', audience_count: messages.length })
       .select()
       .single();
 
