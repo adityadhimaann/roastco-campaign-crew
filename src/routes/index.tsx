@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   Sparkles,
   Send,
-  Bot,
   Users,
   MessageCircle,
   Pencil,
@@ -21,17 +20,19 @@ export const Route = createFileRoute("/")({
   component: CampaignsPage,
 });
 
-type Msg = { from: "ai" | "user"; text: string; loading?: boolean };
+type Msg = { from: "ai" | "user"; text: string; time: string; loading?: boolean };
 
 const initialMessages: Msg[] = [
   {
     from: "user",
     text: "Re-engage customers who haven't ordered in 60 days. Offer 15% off.",
+    time: "10:02 AM",
   },
-  { from: "ai", text: "Got it. Searching your customer database…", loading: true },
+  { from: "ai", text: "Got it. Searching your customer database…", time: "10:02 AM", loading: true },
   {
     from: "ai",
     text: "Found 127 customers matching your criteria. Here's what I'm planning:",
+    time: "10:03 AM",
   },
 ];
 
@@ -71,31 +72,36 @@ function CampaignsPage() {
               <div
                 key={i}
                 className={cn(
-                  "flex gap-2.5 max-w-[85%]",
-                  m.from === "user" ? "ml-auto flex-row-reverse" : "",
+                  "flex",
+                  m.from === "user" ? "justify-end" : "justify-start",
                 )}
               >
-                {m.from === "ai" && (
-                  <div className="h-7 w-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                    <Bot className="h-3.5 w-3.5" />
-                  </div>
-                )}
-                <div
-                  className={cn(
-                    "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-                    m.from === "ai"
-                      ? "bg-slate-100 text-slate-800 rounded-tl-sm"
-                      : "bg-primary text-primary-foreground rounded-tr-sm",
-                  )}
-                >
-                  {m.text}
-                  {m.loading && (
-                    <span className="inline-flex gap-1 ml-2 align-middle">
-                      <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse [animation-delay:150ms]" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse [animation-delay:300ms]" />
+                <div className="flex flex-col max-w-[75%]">
+                  <div
+                    className={cn(
+                      "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
+                      m.from === "ai"
+                        ? "bg-white text-slate-800 rounded-bl-sm border border-slate-200/80"
+                        : "bg-[#DCF8C6] text-slate-800 rounded-br-sm",
+                    )}
+                  >
+                    {m.text}
+                    {m.loading && (
+                      <span className="inline-flex gap-1 ml-2 align-middle">
+                        <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse [animation-delay:150ms]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse [animation-delay:300ms]" />
+                      </span>
+                    )}
+                    <span
+                      className={cn(
+                        "block text-[10px] mt-1 text-right",
+                        m.from === "ai" ? "text-slate-400" : "text-emerald-700/70",
+                      )}
+                    >
+                      {m.time}
                     </span>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}
