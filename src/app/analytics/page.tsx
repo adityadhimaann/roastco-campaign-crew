@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+"use client";
+
 import { ArrowUpRight, ArrowRight, Calendar } from "lucide-react";
 import {
   LineChart,
@@ -14,16 +15,7 @@ import {
   Legend,
 } from "recharts";
 import { cn } from "@/lib/utils";
-
-export const Route = createFileRoute("/analytics")({
-  head: () => ({
-    meta: [
-      { title: "Analytics · Roast & Co. CRM" },
-      { name: "description", content: "Campaign performance analytics for Roast & Co." },
-    ],
-  }),
-  component: AnalyticsPage,
-});
+import { MetricCard } from "@/components/metric-card";
 
 const metrics = [
   { label: "Sent", value: "847", change: "+12% vs last month", trend: "up", color: "bg-blue-50 text-blue-600" },
@@ -57,7 +49,7 @@ const campaignRows = [
   { name: "Weekend Special", audience: 231, sent: 231, delivered: 196, opened: 78, clicked: 19, orders: 8 },
 ];
 
-function AnalyticsPage() {
+export default function AnalyticsPage() {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
@@ -73,18 +65,14 @@ function AnalyticsPage() {
       {/* Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         {metrics.map((m) => (
-          <div key={m.label} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-                {m.label}
-              </span>
-              <span className={cn("h-7 w-7 rounded-md inline-flex items-center justify-center", m.color)}>
-                {m.trend === "up" ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
-              </span>
-            </div>
-            <div className="mt-2 text-2xl font-semibold text-slate-900">{m.value}</div>
-            <div className="mt-1 text-xs text-slate-500">{m.change}</div>
-          </div>
+          <MetricCard
+            key={m.label}
+            label={m.label}
+            value={m.value}
+            change={m.change}
+            trend={m.trend as "up" | "right"}
+            color={m.color}
+          />
         ))}
       </div>
 
@@ -113,7 +101,16 @@ function AnalyticsPage() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={55}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                >
                   {pieData.map((d) => (
                     <Cell key={d.name} fill={d.color} />
                   ))}

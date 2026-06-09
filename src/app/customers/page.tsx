@@ -1,16 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+"use client";
+
 import { Search, Upload, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/customers")({
-  head: () => ({
-    meta: [
-      { title: "Customers · Roast & Co. CRM" },
-      { name: "description", content: "Customer directory and segments for Roast & Co." },
-    ],
-  }),
-  component: CustomersPage,
-});
+export default function CustomersPage() {
 
 const customers = [
   { name: "Priya Sharma", email: "priya.s@gmail.com", city: "Mumbai", orders: 8, spent: 4200, last: "3 days ago", status: "Active" },
@@ -35,7 +28,7 @@ function initials(name: string) {
   return name.split(" ").map((n) => n[0]).slice(0, 2).join("");
 }
 
-function CustomersPage() {
+
   return (
     <div className="p-8">
       <div className="flex items-start justify-between gap-4 mb-6">
