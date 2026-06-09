@@ -185,9 +185,9 @@ export default function CampaignsPage() {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[500px]">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[600px]">
           {/* Chat Box (LEFT) */}
-          <div className="lg:col-span-3 relative h-[500px] lg:h-auto">
+          <div className="lg:col-span-3 relative h-[600px] lg:h-auto">
             <div className="absolute inset-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
