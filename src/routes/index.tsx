@@ -21,17 +21,19 @@ export const Route = createFileRoute("/")({
   component: CampaignsPage,
 });
 
-type Msg = { from: "ai" | "user"; text: string; loading?: boolean };
+type Msg = { from: "ai" | "user"; text: string; time: string; loading?: boolean };
 
 const initialMessages: Msg[] = [
   {
     from: "user",
     text: "Re-engage customers who haven't ordered in 60 days. Offer 15% off.",
+    time: "10:02 AM",
   },
-  { from: "ai", text: "Got it. Searching your customer database…", loading: true },
+  { from: "ai", text: "Got it. Searching your customer database…", time: "10:02 AM", loading: true },
   {
     from: "ai",
     text: "Found 127 customers matching your criteria. Here's what I'm planning:",
+    time: "10:03 AM",
   },
 ];
 
