@@ -15,7 +15,7 @@ export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any
   const isDraft = campaign.status === 'draft';
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[500px]">
       <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
         <h2 className="font-semibold text-slate-900 text-sm">Campaign Preview</h2>
         <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium uppercase tracking-wider">
