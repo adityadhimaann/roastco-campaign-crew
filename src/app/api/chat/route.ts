@@ -27,7 +27,7 @@ const createCampaignDeclaration = {
   type: 'function' as const,
   function: {
     name: 'create_campaign',
-    description: 'Create and fire a campaign after user confirms',
+    description: 'Create a draft campaign in the system so the user can preview it',
     parameters: {
       type: 'object',
       properties: {
@@ -38,6 +38,21 @@ const createCampaignDeclaration = {
         channel: { type: 'string', description: 'One of: whatsapp, sms, email' }
       },
       required: ['name', 'goal', 'message_template', 'channel']
+    }
+  }
+};
+
+const sendCampaignDeclaration = {
+  type: 'function' as const,
+  function: {
+    name: 'send_campaign',
+    description: 'Send a previously drafted campaign after user confirms',
+    parameters: {
+      type: 'object',
+      properties: {
+        campaign_id: { type: 'string' }
+      },
+      required: ['campaign_id']
     }
   }
 };
@@ -60,39 +75,40 @@ const getCampaignStatsDeclaration = {
 const tools = [
   queryCustomersDeclaration,
   createCampaignDeclaration,
+  sendCampaignDeclaration,
   getCampaignStatsDeclaration
 ];
 
+async function getFilteredCustomers(filters: any) {
+  const { data: orders } = await supabase.from('orders').select('customer_id, ordered_at, amount');
+  const { data: customers } = await supabase.from('customers').select('*');
+
+  const enriched = customers!.map(c => {
+    const customerOrders = orders!.filter(o => o.customer_id === c.id);
+    const totalSpent = customerOrders.reduce((sum, o) => sum + o.amount, 0);
+    const lastOrder = customerOrders.sort((a, b) =>
+      new Date(b.ordered_at).getTime() - new Date(a.ordered_at).getTime()
+    )[0];
+    const daysSince = lastOrder
+      ? Math.floor((Date.now() - new Date(lastOrder.ordered_at).getTime()) / 86400000)
+      : 999;
+
+    return { ...c, totalSpent, daysSince, orderCount: customerOrders.length };
+  });
+
+  let filtered = enriched;
+  if (filters.days_since_order !== undefined) filtered = filtered.filter(c => c.daysSince >= filters.days_since_order);
+  if (filters.min_spent !== undefined) filtered = filtered.filter(c => c.totalSpent >= filters.min_spent);
+  if (filters.max_spent !== undefined) filtered = filtered.filter(c => c.totalSpent <= filters.max_spent);
+  if (filters.city !== undefined) filtered = filtered.filter(c => c.city === filters.city);
+  if (filters.order_count !== undefined) filtered = filtered.filter(c => c.orderCount >= filters.order_count);
+
+  return filtered;
+}
+
 async function executeTool(name: string, input: any) {
   if (name === 'query_customers') {
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('customer_id, ordered_at, amount');
-
-    const { data: customers } = await supabase
-      .from('customers')
-      .select('*');
-
-    // Calculate derived stats per customer
-    const enriched = customers!.map(c => {
-      const customerOrders = orders!.filter(o => o.customer_id === c.id);
-      const totalSpent = customerOrders.reduce((sum, o) => sum + o.amount, 0);
-      const lastOrder = customerOrders.sort((a, b) =>
-        new Date(b.ordered_at).getTime() - new Date(a.ordered_at).getTime()
-      )[0];
-      const daysSince = lastOrder
-        ? Math.floor((Date.now() - new Date(lastOrder.ordered_at).getTime()) / 86400000)
-        : 999;
-
-      return { ...c, totalSpent, daysSince, orderCount: customerOrders.length };
-    });
-
-    // Apply filters
-    let filtered = enriched;
-    if (input.days_since_order) filtered = filtered.filter(c => c.daysSince >= input.days_since_order);
-    if (input.min_spent) filtered = filtered.filter(c => c.totalSpent >= input.min_spent);
-    if (input.city) filtered = filtered.filter(c => c.city === input.city);
-    if (input.order_count) filtered = filtered.filter(c => c.orderCount >= input.order_count);
+    const filtered = await getFilteredCustomers(input);
 
     return {
       count: filtered.length,
@@ -102,12 +118,10 @@ async function executeTool(name: string, input: any) {
   }
 
   if (name === 'create_campaign') {
-    // Fetch the customers again to personalize messages
-    const { data: customers } = await supabase
-      .from('customers')
-      .select('id, name, email');
+    // Re-run the filter logic to get the exact real audience
+    const customers = await getFilteredCustomers(input.segment_filters || {});
 
-    const messages = customers!.slice(0, 50).map(c => ({  // limit for demo
+    const messages = customers.map(c => ({
       customer_id: c.id,
       content: input.message_template.replace('{{name}}', c.name.split(' ')[0]),
       channel: input.channel
@@ -123,7 +137,21 @@ async function executeTool(name: string, input: any) {
     if (!data.campaign) {
       return { success: false, error: data.error || data.details || "Failed to create campaign" };
     }
-    return { success: true, campaign_id: data.campaign.id, messages_queued: messages.length };
+    return { success: true, campaign_id: data.campaign.id, messages_queued: messages.length, note: 'Draft created successfully. Ask user for confirmation to send.' };
+  }
+
+  if (name === 'send_campaign') {
+    // We update the DB status to 'running' which triggers the backend pollers
+    const { error } = await supabase
+      .from('campaigns')
+      .update({ status: 'running' })
+      .eq('id', input.campaign_id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, message: "Campaign has been sent!" };
   }
 
   if (name === 'get_campaign_stats') {
@@ -146,17 +174,24 @@ export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
-    const systemPrompt = `You are a CRM campaign agent for Roast & Co., a coffee chain brand in India.
+const systemPrompt = `You are a CRM campaign agent for Roast & Co., a coffee chain brand in India.
 You help marketers reach their customers through targeted campaigns.
 
 When a marketer describes a goal:
-1. Use query_customers to find the right audience and show them the count + sample
-2. Draft a personalized message with {{name}} placeholder
-3. Ask for confirmation: "Found X customers. Here's the plan: [summary]. Shall I send this?"
-4. Only call create_campaign after explicit confirmation ("yes", "send it", "go ahead")
-5. After sending, tell them to check Analytics for live updates
+1. Use query_customers to find the right audience.
+2. IMMEDIATELY use the create_campaign tool to generate a draft of the personalized message in the system.
+3. Once the draft is created, respond to the user in a clearly structured, friendly way using paragraphs and bullet points.
 
-Keep responses concise and conversational. Always show numbers.
+FORMATTING RULES for your response:
+- Announce the audience count clearly (e.g. "I found **250** high-value customers!").
+- List the sample customer names using proper bullet points (e.g. "\\n- Priya\\n- Rohan").
+- DO NOT use markdown headings with hashes (like "### Plan" or "###").
+- End your message by saying: "I've created a draft! Review the preview on the right. Shall I send this?"
+
+4. Only use the send_campaign tool after the user provides explicit confirmation ("yes", "send it", "go ahead").
+5. After sending, tell them the campaign is running and to check Analytics for live updates.
+
+Keep responses concise and conversational.
 Current date: ${new Date().toLocaleDateString('en-IN')}`;
 
     // Convert the incoming UI messages ({ role: 'user'|'assistant', content: string }) 

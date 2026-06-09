@@ -65,7 +65,8 @@ export default function AnalyticsPage() {
     { label: "Sent", value: stats.sent.toString(), change: "Live tracking", trend: "up", color: "bg-blue-50 text-blue-600" },
     { label: "Delivered", value: stats.delivered.toString(), change: "Live tracking", trend: "up", color: "bg-emerald-50 text-emerald-600" },
     { label: "Opened", value: stats.opened.toString(), change: "Live tracking", trend: "up", color: "bg-purple-50 text-purple-600" },
-    { label: "Clicked", value: stats.clicked.toString(), change: "Live tracking", trend: "right", color: "bg-amber-50 text-amber-600" },
+    { label: "Clicked", value: stats.clicked.toString(), change: "Live tracking", trend: "up", color: "bg-amber-50 text-amber-600" },
+    { label: "Failed", value: Math.max(0, stats.sent - stats.delivered).toString(), change: "Live tracking", trend: "right", color: "bg-slate-100 text-slate-500" },
   ];
 
   const dynamicPieData = [

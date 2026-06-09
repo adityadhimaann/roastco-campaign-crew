@@ -15,15 +15,15 @@ export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any
   const isDraft = campaign.status === 'draft';
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
         <h2 className="font-semibold text-slate-900 text-sm">Campaign Preview</h2>
         <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium uppercase tracking-wider">
           {campaign.status}
         </span>
       </div>
 
-      <div className="p-5 space-y-5">
+      <div className="p-5 space-y-5 flex-1 overflow-y-auto">
         {/* Segment */}
         <div>
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-wide">
@@ -36,11 +36,24 @@ export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any
             {(Array.isArray(campaign.segment_filters) 
                 ? campaign.segment_filters 
                 : (campaign.segment_filters ? [campaign.segment_filters] : [])
-            ).map((filter: any, i: number) => (
-              <span key={i} className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">
-                {typeof filter === 'object' ? JSON.stringify(filter) : String(filter)}
-              </span>
-            ))}
+            ).map((filter: any, i: number) => {
+              if (typeof filter === 'object' && filter !== null) {
+                return Object.entries(filter).map(([key, value]) => {
+                  const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                  return (
+                    <span key={`${i}-${key}`} className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs border border-indigo-100/50 flex items-center gap-1.5 shadow-sm">
+                      <span className="opacity-75">{label}:</span>
+                      <span className="font-semibold">{String(value)}</span>
+                    </span>
+                  );
+                });
+              }
+              return (
+                <span key={i} className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">
+                  {String(filter)}
+                </span>
+              );
+            })}
           </div>
         </div>
 
@@ -51,8 +64,15 @@ export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-wide">
             <MessageCircle className="h-3.5 w-3.5" /> Draft Message
           </div>
-          <div className="mt-2 bg-[#DCF8C6] text-slate-800 text-sm leading-relaxed rounded-2xl rounded-tl-sm px-4 py-3">
-            {campaign.preview_message}
+          <div className="mt-2 bg-[#DCF8C6] text-slate-800 text-sm leading-relaxed rounded-2xl rounded-tl-sm px-4 py-3 whitespace-pre-wrap">
+            {campaign.preview_message ? (
+              campaign.preview_message.split(/(\*\*.*?\*\*)/g).map((part: string, i: number) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                  return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+                }
+                return <span key={i}>{part}</span>;
+              })
+            ) : null}
           </div>
           <p className="mt-2 text-xs text-slate-400">Message personalized per customer</p>
         </div>

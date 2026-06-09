@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Bot, User } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export type Msg = {
   from: "ai" | "user";
@@ -28,9 +29,22 @@ export function ChatMessage({ message }: { message: Msg }) {
               : "bg-[#DCF8C6] text-slate-800 rounded-br-sm",
           )}
         >
-          {message.text}
+          <div className="flex flex-col">
+            <ReactMarkdown
+              components={{
+                p: ({node, ...props}) => <p className="mb-2 last:mb-0 leading-relaxed" {...props} />,
+                ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                li: ({node, ...props}) => <li {...props} />,
+                h3: ({node, ...props}) => <h3 className="font-semibold text-sm mb-1 mt-3" {...props} />,
+                strong: ({node, ...props}) => <strong className="font-semibold text-slate-900" {...props} />,
+              }}
+            >
+              {message.text}
+            </ReactMarkdown>
+          </div>
           {message.loading && (
-            <span className="inline-flex gap-1 ml-2 align-middle">
+            <span className="inline-flex gap-1 ml-2 align-middle mt-1">
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse" />
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse [animation-delay:150ms]" />
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse [animation-delay:300ms]" />

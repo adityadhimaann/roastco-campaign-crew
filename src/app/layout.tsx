@@ -1,5 +1,6 @@
 import "@/styles.css";
 import { AppSidebar } from "@/components/sidebar";
+import { Toaster } from "sonner";
 
 export const metadata = {
   title: "Roast & Co. CRM",
@@ -18,6 +19,7 @@ export default function RootLayout({
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {children}
         </main>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );
