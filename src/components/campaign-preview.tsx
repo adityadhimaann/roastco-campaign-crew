@@ -107,19 +107,20 @@ export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any
           </div>
         </div>
 
-        {/* Actions */}
-        {isDraft && (
-          <div className="flex gap-2 pt-1">
-            <button 
-              onClick={() => onSend(campaign.id)}
-              disabled={isSending}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-4 py-2.5 text-sm font-medium disabled:opacity-50"
-            >
-              <Send className="h-3.5 w-3.5" /> {isSending ? 'Sending...' : 'Send Campaign'}
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Actions */}
+      {isDraft && (
+        <div className="p-5 border-t border-slate-100 bg-slate-50 shrink-0">
+          <button 
+            onClick={() => onSend(campaign.id)}
+            disabled={isSending}
+            className="w-full inline-flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+          >
+            <Send className="h-3.5 w-3.5" /> {isSending ? 'Sending...' : 'Send Campaign'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
