@@ -11,6 +11,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -38,6 +39,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@supabase/supabase-js": "^2.108.0",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
@@ -64,9 +66,10 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@tailwindcss/postcss": "^4.3.0",
-    "@types/node": "^22.16.5",
+    "@types/node": "^22.19.20",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "dotenv": "^17.4.2",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",
@@ -76,7 +79,8 @@
     "nitro": "3.0.260603-beta",
     "postcss": "^8.5.15",
     "prettier": "^3.7.3",
-    "typescript": "^5.8.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1"
   }
 }

@@ -1,20 +1,8 @@
-"use client";
-
 import { Search, Upload, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
-export default function CustomersPage() {
-
-const customers = [
-  { name: "Priya Sharma", email: "priya.s@gmail.com", city: "Mumbai", orders: 8, spent: 4200, last: "3 days ago", status: "Active" },
-  { name: "Rohan Mehta", email: "rohan.m@gmail.com", city: "Delhi", orders: 2, spent: 890, last: "67 days ago", status: "Lapsed" },
-  { name: "Ananya Iyer", email: "ananya.i@gmail.com", city: "Bangalore", orders: 12, spent: 6100, last: "1 day ago", status: "Active" },
-  { name: "Karan Patel", email: "karan.p@gmail.com", city: "Ahmedabad", orders: 1, spent: 340, last: "45 days ago", status: "At Risk" },
-  { name: "Sneha Nair", email: "sneha.n@gmail.com", city: "Kochi", orders: 6, spent: 2800, last: "12 days ago", status: "Active" },
-  { name: "Arjun Singh", email: "arjun.s@gmail.com", city: "Chandigarh", orders: 3, spent: 1200, last: "72 days ago", status: "Lapsed" },
-  { name: "Divya Reddy", email: "divya.r@gmail.com", city: "Hyderabad", orders: 9, spent: 4600, last: "5 days ago", status: "Active" },
-  { name: "Amit Joshi", email: "amit.j@gmail.com", city: "Pune", orders: 1, spent: 280, last: "38 days ago", status: "At Risk" },
-];
+export const revalidate = 0; // Disable caching so it's always fresh
 
 const filters = ["All Customers", "High Value", "At Risk", "New (< 30 days)", "Lapsed (> 60 days)"];
 
@@ -22,19 +10,58 @@ const statusStyles: Record<string, string> = {
   Active: "bg-emerald-50 text-emerald-700",
   "At Risk": "bg-amber-50 text-amber-700",
   Lapsed: "bg-red-50 text-red-600",
+  New: "bg-blue-50 text-blue-700",
 };
 
 function initials(name: string) {
   return name.split(" ").map((n) => n[0]).slice(0, 2).join("");
 }
 
+export default async function CustomersPage() {
+  const { data: customersData, error } = await supabase
+    .from("customers")
+    .select("*, orders(amount, created_at)")
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("Error fetching customers:", error);
+  }
+
+  const customers = (customersData || []).map((c: any) => {
+    const totalOrders = c.orders?.length || 0;
+    const spent = c.orders?.reduce((acc: number, o: any) => acc + Number(o.amount), 0) || 0;
+    
+    const lastOrderDates = c.orders?.map((o: any) => new Date(o.created_at).getTime()) || [];
+    const maxDate = lastOrderDates.length ? Math.max(...lastOrderDates) : null;
+    const daysAgo = maxDate ? Math.floor((Date.now() - maxDate) / (1000 * 60 * 60 * 24)) : null;
+    
+    let last = 'Never';
+    let status = "New";
+    if (daysAgo !== null) {
+      last = daysAgo === 0 ? 'Today' : `${daysAgo} days ago`;
+      if (daysAgo > 60) status = "Lapsed";
+      else if (daysAgo > 30) status = "At Risk";
+      else status = "Active";
+    }
+
+    return {
+      id: c.id,
+      name: c.name,
+      email: c.email || "No email",
+      city: c.city || "Unknown",
+      orders_count: totalOrders,
+      spent,
+      last,
+      status
+    };
+  });
 
   return (
     <div className="p-8">
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Customer Directory</h1>
-          <p className="text-sm text-slate-500 mt-1">200 customers · 847 orders</p>
+          <p className="text-sm text-slate-500 mt-1">{customers.length} customers</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -81,7 +108,7 @@ function initials(name: string) {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {customers.map((c) => (
-              <tr key={c.email} className="hover:bg-slate-50/60 transition-colors">
+              <tr key={c.id} className="hover:bg-slate-50/60 transition-colors">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold">
@@ -94,11 +121,11 @@ function initials(name: string) {
                   </div>
                 </td>
                 <td className="px-5 py-3.5 text-slate-600">{c.city}</td>
-                <td className="px-5 py-3.5 text-slate-900">{c.orders}</td>
+                <td className="px-5 py-3.5 text-slate-900">{c.orders_count}</td>
                 <td className="px-5 py-3.5 text-slate-900">₹{c.spent.toLocaleString("en-IN")}</td>
                 <td className="px-5 py-3.5 text-slate-600">{c.last}</td>
                 <td className="px-5 py-3.5">
-                  <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", statusStyles[c.status])}>
+                  <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", statusStyles[c.status] || "bg-slate-100 text-slate-700")}>
                     {c.status}
                   </span>
                 </td>
@@ -111,13 +138,6 @@ function initials(name: string) {
             ))}
           </tbody>
         </table>
-        <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>Showing 1–8 of 200 customers</span>
-          <div className="flex gap-1">
-            <button className="px-3 py-1 rounded-md border border-slate-200 hover:bg-slate-50">Previous</button>
-            <button className="px-3 py-1 rounded-md border border-slate-200 hover:bg-slate-50">Next</button>
-          </div>
-        </div>
       </div>
     </div>
   );

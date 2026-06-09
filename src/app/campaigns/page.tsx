@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sparkles,
   Send,
@@ -14,23 +14,84 @@ export default function CampaignsPage() {
 
 
 
-const initialMessages: Msg[] = [
-  {
-    from: "user",
-    text: "Re-engage customers who haven't ordered in 60 days. Offer 15% off.",
-    time: "10:02 AM",
-  },
-  { from: "ai", text: "Got it. Searching your customer database…", time: "10:02 AM", loading: true },
-  {
-    from: "ai",
-    text: "Found 127 customers matching your criteria. Here's what I'm planning:",
-    time: "10:03 AM",
-  },
-];
-
-
-  const [messages] = useState<Msg[]>(initialMessages);
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [recentCampaigns, setRecentCampaigns] = useState<any[]>([]);
+  const [loadingCampaigns, setLoadingCampaigns] = useState(true);
+
+  // Fetch recent campaigns for the sidebar
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const res = await fetch('/api/analytics');
+        const data = await res.json();
+        if (data.campaigns) {
+          setRecentCampaigns(data.campaigns);
+        }
+      } catch (err) {
+        console.error("Error fetching recent campaigns:", err);
+      } finally {
+        setLoadingCampaigns(false);
+      }
+    };
+    fetchCampaigns();
+    // Poll every few seconds so it updates when a new one is created via chat
+    const interval = setInterval(fetchCampaigns, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+
+    const userMsg: Msg = {
+      from: "user",
+      text: input,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+
+    try {
+      // Convert to API format {role: 'user'|'assistant', content: string}
+      const apiMessages = newMessages.map(m => ({
+        role: m.from === "ai" ? "assistant" : "user",
+        content: m.text
+      }));
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: apiMessages })
+      });
+
+      const data = await res.json();
+      
+      setMessages((prev) => [
+        ...prev,
+        {
+          from: "ai",
+          text: data.message || "An error occurred.",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }
+      ]);
+    } catch (err) {
+      console.error(err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          from: "ai",
+          text: "Sorry, I couldn't connect to the server.",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="p-8">
@@ -70,10 +131,17 @@ const initialMessages: Msg[] = [
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
                 placeholder="Describe your campaign goal…"
                 className="flex-1 bg-transparent px-4 py-3 text-sm outline-none placeholder:text-slate-400 h-full"
               />
               <button
+                onClick={handleSend}
                 className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-3.5 py-2 text-sm font-medium transition-colors"
                 aria-label="Send"
               >
@@ -93,23 +161,25 @@ const initialMessages: Msg[] = [
               <h3 className="font-semibold text-slate-900 text-sm">Recent Campaigns</h3>
             </div>
             <ul className="divide-y divide-slate-100">
-              {[
-                { name: "Win-back Q2", sent: 89, ago: "3 days ago" },
-                { name: "New Menu Launch", sent: 234, ago: "1 week ago" },
-                { name: "Loyalty Push", sent: 56, ago: "2 weeks ago" },
-              ].map((c) => (
-                <li key={c.name} className="px-5 py-3 flex items-center justify-between text-sm">
-                  <div>
-                    <div className="font-medium text-slate-900">{c.name}</div>
-                    <div className="text-xs text-slate-500">
-                      Sent {c.sent} · {c.ago}
+              {loadingCampaigns ? (
+                <li className="px-5 py-8 text-center text-slate-400 text-sm">Loading...</li>
+              ) : recentCampaigns.length === 0 ? (
+                <li className="px-5 py-8 text-center text-slate-400 text-sm">No campaigns sent yet.</li>
+              ) : (
+                recentCampaigns.map((c: any) => (
+                  <li key={c.id} className="px-5 py-3 flex items-center justify-between text-sm">
+                    <div>
+                      <div className="font-medium text-slate-900">{c.name}</div>
+                      <div className="text-xs text-slate-500">
+                        Audience: {c.audience_count} · {new Date(c.created_at).toLocaleDateString()}
+                      </div>
                     </div>
-                  </div>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
-                    <CheckCircle2 className="h-3 w-3" /> Completed
-                  </span>
-                </li>
-              ))}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
+                      <CheckCircle2 className="h-3 w-3" /> Running
+                    </span>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </div>
