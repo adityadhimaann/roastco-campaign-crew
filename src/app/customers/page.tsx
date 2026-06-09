@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Search, Upload, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -17,7 +18,13 @@ function initials(name: string) {
   return name.split(" ").map((n) => n[0]).slice(0, 2).join("");
 }
 
-export default async function CustomersPage() {
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams: { filter?: string };
+}) {
+  const currentFilter = searchParams.filter || "All Customers";
+
   const { data: customersData, error } = await supabase
     .from("customers")
     .select("*, orders(amount, ordered_at)")
@@ -27,7 +34,7 @@ export default async function CustomersPage() {
     console.error("Error fetching customers:", error);
   }
 
-  const customers = (customersData || []).map((c: any) => {
+  let customers = (customersData || []).map((c: any) => {
     const totalOrders = c.orders?.length || 0;
     const spent = c.orders?.reduce((acc: number, o: any) => acc + Number(o.amount), 0) || 0;
     
@@ -56,6 +63,17 @@ export default async function CustomersPage() {
     };
   });
 
+  // Apply Filter
+  if (currentFilter === "High Value") {
+    customers = customers.filter(c => c.spent > 3000);
+  } else if (currentFilter === "At Risk") {
+    customers = customers.filter(c => c.status === "At Risk");
+  } else if (currentFilter === "New (< 30 days)") {
+    customers = customers.filter(c => c.status === "New" || c.last === 'Never');
+  } else if (currentFilter === "Lapsed (> 60 days)") {
+    customers = customers.filter(c => c.status === "Lapsed");
+  }
+
   return (
     <div className="p-8">
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -78,18 +96,19 @@ export default async function CustomersPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-5">
-        {filters.map((f, i) => (
-          <button
+        {filters.map((f) => (
+          <Link
             key={f}
+            href={`/customers?filter=${encodeURIComponent(f)}`}
             className={cn(
               "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
-              i === 0
+              currentFilter === f
                 ? "bg-slate-900 text-white border-slate-900"
                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50",
             )}
           >
             {f}
-          </button>
+          </Link>
         ))}
       </div>
 

@@ -19,22 +19,42 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(false);
   const [recentCampaigns, setRecentCampaigns] = useState<any[]>([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("chat_history");
+    if (stored) {
+      try { setMessages(JSON.parse(stored)); } catch (e) {}
+    } else {
+      setMessages([{
+        from: "ai",
+        text: "Hi! I'm your campaign agent. Describe who you want to reach, and I'll draft the campaign for you.",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      }]);
+    }
+  }, []);
+
+  const updateMessages = (newMessages: Msg[]) => {
+    setMessages(newMessages);
+    localStorage.setItem("chat_history", JSON.stringify(newMessages));
+  };
+
+  const fetchCampaigns = async () => {
+    try {
+      const res = await fetch('/api/campaigns');
+      const data = await res.json();
+      if (data.campaigns) {
+        setRecentCampaigns(data.campaigns);
+      }
+    } catch (err) {
+      console.error("Error fetching recent campaigns:", err);
+    } finally {
+      setLoadingCampaigns(false);
+    }
+  };
 
   // Fetch recent campaigns for the sidebar
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        const res = await fetch('/api/analytics');
-        const data = await res.json();
-        if (data.campaigns) {
-          setRecentCampaigns(data.campaigns);
-        }
-      } catch (err) {
-        console.error("Error fetching recent campaigns:", err);
-      } finally {
-        setLoadingCampaigns(false);
-      }
-    };
     fetchCampaigns();
     // Poll every few seconds so it updates when a new one is created via chat
     const interval = setInterval(fetchCampaigns, 5000);
@@ -51,7 +71,7 @@ export default function CampaignsPage() {
     };
 
     const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
+    updateMessages(newMessages);
     setInput("");
     setLoading(true);
 
@@ -70,18 +90,19 @@ export default function CampaignsPage() {
 
       const data = await res.json();
       
-      setMessages((prev) => [
-        ...prev,
+      updateMessages([
+        ...newMessages,
         {
           from: "ai",
           text: data.message || "An error occurred.",
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         }
       ]);
+      fetchCampaigns(); // Refresh campaigns to show draft
     } catch (err) {
       console.error(err);
-      setMessages((prev) => [
-        ...prev,
+      updateMessages([
+        ...newMessages,
         {
           from: "ai",
           text: "Sorry, I couldn't connect to the server.",
@@ -92,6 +113,24 @@ export default function CampaignsPage() {
       setLoading(false);
     }
   };
+
+  const handleSendCampaign = async (campaignId: string) => {
+    setIsSending(true);
+    try {
+      await fetch('/api/campaigns/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaignId })
+      });
+      await fetchCampaigns();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const draftCampaign = recentCampaigns.find(c => c.status === 'draft');
 
   return (
     <div className="p-8">
@@ -153,7 +192,11 @@ export default function CampaignsPage() {
 
         {/* RIGHT — Preview */}
         <div className="lg:col-span-2 space-y-6">
-          <CampaignPreview />
+          <CampaignPreview 
+            campaign={draftCampaign} 
+            onSend={handleSendCampaign}
+            isSending={isSending}
+          />
 
           {/* Recent */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm">

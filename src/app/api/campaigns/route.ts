@@ -4,23 +4,37 @@ import { supabase } from '@/lib/supabase';
 export async function GET() {
   const { data, error } = await supabase
     .from('campaigns')
-    .select('*')
+    .select('*, messages(content, channel)')
     .order('created_at', { ascending: false })
     .limit(10);
 
   if (error) return NextResponse.json({ error }, { status: 500 });
-  return NextResponse.json({ campaigns: data });
+
+  // Map to just return the first message details to the frontend
+  const campaigns = data.map((c: any) => ({
+    ...c,
+    preview_message: c.messages?.[0]?.content || "No message",
+    channel: c.messages?.[0]?.channel || "Unknown"
+  }));
+
+  return NextResponse.json({ campaigns });
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, goal, segment_filters, messages } = body;
+    const { name, goal, segment_filters, messages, draft } = body;
 
     // 1. Create campaign
     const { data: campaign, error } = await supabase
       .from('campaigns')
-      .insert({ name, goal, segment_filters, status: 'sending', audience_count: messages.length })
+      .insert({ 
+        name, 
+        goal, 
+        segment_filters, 
+        status: draft ? 'draft' : 'sending', 
+        audience_count: messages.length 
+      })
       .select()
       .single();
 
@@ -44,8 +58,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: msgError }, { status: 500 });
     }
 
-    // 3. Fire and forget — send to channel service
-    fireMessages(campaign.id);
+    // 3. Fire and forget — send to channel service (if not draft)
+    if (!draft) {
+      fireMessages(campaign.id);
+    }
 
     return NextResponse.json({ campaign });
   } catch (err) {

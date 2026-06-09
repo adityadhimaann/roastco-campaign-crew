@@ -109,7 +109,7 @@ async function executeTool(name: string, input: any) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/campaigns`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...input, messages })
+      body: JSON.stringify({ ...input, messages, draft: true })
     });
 
     const data = await response.json();
