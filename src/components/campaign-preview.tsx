@@ -33,9 +33,12 @@ export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any
             {campaign.audience_count} <span className="text-sm font-normal text-slate-500">customers</span>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {(campaign.segment_filters || []).map((filter: string, i: number) => (
+            {(Array.isArray(campaign.segment_filters) 
+                ? campaign.segment_filters 
+                : (campaign.segment_filters ? [campaign.segment_filters] : [])
+            ).map((filter: any, i: number) => (
               <span key={i} className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">
-                {filter}
+                {typeof filter === 'object' ? JSON.stringify(filter) : String(filter)}
               </span>
             ))}
           </div>

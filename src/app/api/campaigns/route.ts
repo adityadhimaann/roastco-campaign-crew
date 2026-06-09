@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const { data, error } = await supabase
     .from('campaigns')
@@ -14,7 +16,8 @@ export async function GET() {
   const campaigns = data.map((c: any) => ({
     ...c,
     preview_message: c.messages?.[0]?.content || "No message",
-    channel: c.messages?.[0]?.channel || "Unknown"
+    channel: c.messages?.[0]?.channel || "Unknown",
+    audience_count: c.messages?.length || 0
   }));
 
   return NextResponse.json({ campaigns });
@@ -32,8 +35,7 @@ export async function POST(req: Request) {
         name, 
         goal, 
         segment_filters, 
-        status: draft ? 'draft' : 'sending', 
-        audience_count: messages.length 
+        status: draft ? 'draft' : 'sending'
       })
       .select()
       .single();

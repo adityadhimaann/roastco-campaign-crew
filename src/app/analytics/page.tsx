@@ -20,15 +20,6 @@ import { MetricCard } from "@/components/metric-card";
 
 
 
-const lineData = [
-  { day: "Mon", Sent: 110, Delivered: 92, Opened: 41 },
-  { day: "Tue", Sent: 135, Delivered: 118, Opened: 52 },
-  { day: "Wed", Sent: 98, Delivered: 84, Opened: 36 },
-  { day: "Thu", Sent: 142, Delivered: 121, Opened: 58 },
-  { day: "Fri", Sent: 128, Delivered: 109, Opened: 49 },
-  { day: "Sat", Sent: 156, Delivered: 132, Opened: 61 },
-  { day: "Sun", Sent: 78, Delivered: 65, Opened: 27 },
-];
 
 const pieData = [
   { name: "Delivered", value: 721, color: "#3B82F6" },
@@ -47,15 +38,17 @@ const campaignRows = [
 export default function AnalyticsPage() {
   const [stats, setStats] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0 });
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await fetch('/api/analytics');
+        const res = await fetch('/api/analytics', { cache: 'no-store' });
         const data = await res.json();
         if (data.stats) setStats(data.stats);
         if (data.campaigns) setCampaigns(data.campaigns);
+        if (data.lineData) setChartData(data.lineData);
       } catch (err) {
         console.error("Analytics poll error:", err);
       } finally {
@@ -115,8 +108,22 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
         <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm p-5">
           <h3 className="font-semibold text-slate-900 text-sm mb-4">Campaign Performance Over Time</h3>
-          <div className="h-72 flex items-center justify-center text-slate-400 text-sm">
-            Line chart data will populate once you send campaigns over multiple days.
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ fontSize: '13px' }}
+                  labelStyle={{ fontSize: '13px', fontWeight: 600, color: '#0F172A', marginBottom: '4px' }}
+                />
+                <Line type="monotone" dataKey="Sent" stroke="#94A3B8" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="Delivered" stroke="#3B82F6" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="Opened" stroke="#8B5CF6" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

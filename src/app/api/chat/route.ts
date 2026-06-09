@@ -120,6 +120,9 @@ async function executeTool(name: string, input: any) {
     });
 
     const data = await response.json();
+    if (!data.campaign) {
+      return { success: false, error: data.error || data.details || "Failed to create campaign" };
+    }
     return { success: true, campaign_id: data.campaign.id, messages_queued: messages.length };
   }
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, Upload, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { ImportCsvButton } from "@/components/import-csv-button";
 
 export const revalidate = 0; // Disable caching so it's always fresh
 
@@ -89,9 +90,7 @@ export default async function CustomersPage({
               className="pl-9 pr-3 py-2 w-72 text-sm bg-white border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-          <button className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-md">
-            <Upload className="h-4 w-4" /> Import CSV
-          </button>
+          <ImportCsvButton />
         </div>
       </div>
 
@@ -112,17 +111,17 @@ export default async function CustomersPage({
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-slate-500 bg-slate-50">
-              <th className="px-5 py-3 font-medium">Customer</th>
-              <th className="px-5 py-3 font-medium">Location</th>
-              <th className="px-5 py-3 font-medium">Total Orders</th>
-              <th className="px-5 py-3 font-medium">Total Spent</th>
-              <th className="px-5 py-3 font-medium">Last Order</th>
-              <th className="px-5 py-3 font-medium">Status</th>
-              <th className="px-5 py-3 font-medium w-10"></th>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-y-auto h-[calc(100vh-220px)]">
+        <table className="w-full text-sm relative">
+          <thead className="sticky top-0 z-10 bg-slate-50 shadow-[0_1px_0_0_#e2e8f0]">
+            <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+              <th className="px-5 py-3 font-medium bg-slate-50">Customer</th>
+              <th className="px-5 py-3 font-medium bg-slate-50">Location</th>
+              <th className="px-5 py-3 font-medium bg-slate-50">Total Orders</th>
+              <th className="px-5 py-3 font-medium bg-slate-50">Total Spent</th>
+              <th className="px-5 py-3 font-medium bg-slate-50">Last Order</th>
+              <th className="px-5 py-3 font-medium bg-slate-50">Status</th>
+              <th className="px-5 py-3 font-medium w-10 bg-slate-50"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Sparkles,
   Send,
@@ -20,6 +20,15 @@ export default function CampaignsPage() {
   const [recentCampaigns, setRecentCampaigns] = useState<any[]>([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const stored = localStorage.getItem("chat_history");
@@ -41,7 +50,7 @@ export default function CampaignsPage() {
 
   const fetchCampaigns = async () => {
     try {
-      const res = await fetch('/api/campaigns');
+      const res = await fetch('/api/campaigns', { cache: 'no-store' });
       const data = await res.json();
       if (data.campaigns) {
         setRecentCampaigns(data.campaigns);
@@ -163,6 +172,7 @@ export default function CampaignsPage() {
             {messages.map((m, i) => (
               <ChatMessage key={i} message={m} />
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="border-t border-slate-100 p-3">
