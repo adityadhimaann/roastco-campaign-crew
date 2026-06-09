@@ -164,36 +164,38 @@ export default function AnalyticsPage() {
         <div className="px-5 py-4 border-b border-slate-100">
           <h3 className="font-semibold text-slate-900 text-sm">Recent Campaigns</h3>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-slate-500 bg-slate-50">
-              <th className="px-5 py-3 font-medium">Campaign Name</th>
-              <th className="px-5 py-3 font-medium">Audience</th>
-              <th className="px-5 py-3 font-medium">Created At</th>
-              <th className="px-5 py-3 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {loading ? (
-              <tr><td colSpan={4} className="px-5 py-8 text-center text-slate-400">Loading...</td></tr>
-            ) : campaigns.length === 0 ? (
-              <tr><td colSpan={4} className="px-5 py-8 text-center text-slate-400">No campaigns created yet. Run one with Gemini!</td></tr>
-            ) : (
-              campaigns.map((c: any) => (
-                <tr key={c.id} className="hover:bg-slate-50/60">
-                  <td className="px-5 py-3.5 font-medium text-slate-900">{c.name}</td>
-                  <td className="px-5 py-3.5 text-slate-600">{c.audience_count}</td>
-                  <td className="px-5 py-3.5 text-slate-600">{new Date(c.created_at).toLocaleString()}</td>
-                  <td className="px-5 py-3.5">
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
-                      Running
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <div className="max-h-[300px] overflow-y-auto">
+          <table className="w-full text-sm relative">
+            <thead className="sticky top-0 bg-slate-50 shadow-sm z-10">
+              <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                <th className="px-5 py-3 font-medium">Campaign Name</th>
+                <th className="px-5 py-3 font-medium">Audience</th>
+                <th className="px-5 py-3 font-medium">Created At</th>
+                <th className="px-5 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr><td colSpan={4} className="px-5 py-8 text-center text-slate-400">Loading...</td></tr>
+              ) : campaigns.length === 0 ? (
+                <tr><td colSpan={4} className="px-5 py-8 text-center text-slate-400">No campaigns created yet. Run one with Gemini!</td></tr>
+              ) : (
+                campaigns.map((c: any) => (
+                  <tr key={c.id} className="hover:bg-slate-50/60">
+                    <td className="px-5 py-3.5 font-medium text-slate-900">{c.name}</td>
+                    <td className="px-5 py-3.5 text-slate-600">{c.audience_count}</td>
+                    <td className="px-5 py-3.5 text-slate-600">{new Date(c.created_at).toLocaleString()}</td>
+                    <td className="px-5 py-3.5">
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
+                        Running
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
