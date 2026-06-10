@@ -1,4 +1,4 @@
-# ☕ Roast & Co. Campaign Crew (AI-Native CRM)
+# ☕ Roast & Co. Campaign Crew (AI-Native CRM) - https://roastco-campaign-crew.vercel.app
 
 Welcome to the **Roast & Co. Campaign Crew**, an AI-native Mini CRM designed to help marketers reach their customers intelligently. This project was built for the Xeno Engineering Take-Home Assignment.
 
@@ -14,7 +14,7 @@ You simply tell the AI Agent what you want to achieve (e.g., *"Send a 10% discou
 This system follows a decoupled microservice architecture:
 1. **Frontend & API (This Repo)**: Built with Next.js (App Router), React, and TailwindCSS. Handles the AI orchestration, user interface, and database interactions.
 2. **Database (Supabase)**: A robust PostgreSQL database storing `customers`, `orders`, `campaigns`, and `messages`.
-3. **Channel Service**: A completely separate Node.js service that simulates the real-world delivery of messages (like Twilio/SendGrid).
+3. **Channel Service**: A completely separate Node.js service that simulates the real-world delivery of messages (like Twilio/SendGrid) - https://channel-service-cxvh.onrender.com
 
 ## 🔄 The "Life of a Campaign" (Data Flow)
 1. **Intent & AI Orchestration**: The marketer types a prompt. The OpenAI model uses "Function Calling" to execute internal tools (`query_customers` and `create_campaign`), automatically filtering the audience and saving draft messages to Supabase.
