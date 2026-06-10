@@ -1,4 +1,4 @@
-# 🚀 AI-Native Mini CRM (Xeno Take-Home Assignment)
+# 🚀 AI-Native Mini CRM (Xeno Take-Home Assignment) - https://roastco-campaign-crew.vercel.app
 
 An intelligent, decoupled Mini CRM built to help brands orchestrate, personalize, and track marketing campaigns. Instead of building segments manually, this CRM features an **AI Campaign Agent** that understands natural language goals, automatically segments audiences, and drafts highly personalized messaging.
 
