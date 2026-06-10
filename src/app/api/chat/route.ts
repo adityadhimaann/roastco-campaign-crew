@@ -18,7 +18,9 @@ const queryCustomersDeclaration = {
         city: { type: 'string', description: 'Filter by city' },
         name: { type: 'string', description: 'Filter by customer name' },
         tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags' },
-        order_count: { type: 'number', description: 'Minimum number of orders' }
+        min_orders: { type: 'number', description: 'Minimum number of orders' },
+        max_orders: { type: 'number', description: 'Maximum number of orders' },
+        exact_orders: { type: 'number', description: 'Exact number of orders' }
       }
     }
   }
@@ -103,7 +105,9 @@ async function getFilteredCustomers(filters: any) {
   if (filters.max_spent !== undefined) filtered = filtered.filter(c => c.totalSpent <= filters.max_spent);
   if (filters.city !== undefined) filtered = filtered.filter(c => c.city === filters.city);
   if (filters.name !== undefined) filtered = filtered.filter(c => c.name.toLowerCase().includes(filters.name.toLowerCase()));
-  if (filters.order_count !== undefined) filtered = filtered.filter(c => c.orderCount >= filters.order_count);
+  if (filters.min_orders !== undefined) filtered = filtered.filter(c => c.orderCount >= filters.min_orders);
+  if (filters.max_orders !== undefined) filtered = filtered.filter(c => c.orderCount <= filters.max_orders);
+  if (filters.exact_orders !== undefined) filtered = filtered.filter(c => c.orderCount === filters.exact_orders);
 
   return filtered;
 }
