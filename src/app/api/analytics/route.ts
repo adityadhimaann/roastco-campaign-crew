@@ -19,6 +19,7 @@ export async function GET() {
       delivered: messages?.filter(m => m.delivered_at).length ?? 0,
       opened:    messages?.filter(m => m.opened_at).length ?? 0,
       clicked:   messages?.filter(m => m.clicked_at).length ?? 0,
+      failed:    messages?.filter(m => m.status === 'failed').length ?? 0,
     };
 
     const { data: campaignsData, error: campaignsError } = await supabase

@@ -36,7 +36,7 @@ const campaignRows = [
 ];
 
 export default function AnalyticsPage() {
-  const [stats, setStats] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0 });
+  const [stats, setStats] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, failed: 0 });
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,14 +66,16 @@ export default function AnalyticsPage() {
     { label: "Delivered", value: stats.delivered.toString(), change: "Live tracking", trend: "up", color: "bg-emerald-50 text-emerald-600" },
     { label: "Opened", value: stats.opened.toString(), change: "Live tracking", trend: "up", color: "bg-purple-50 text-purple-600" },
     { label: "Clicked", value: stats.clicked.toString(), change: "Live tracking", trend: "up", color: "bg-amber-50 text-amber-600" },
-    { label: "Failed", value: Math.max(0, stats.sent - stats.delivered).toString(), change: "Live tracking", trend: "right", color: "bg-slate-100 text-slate-500" },
+    { label: "Failed", value: stats.failed.toString(), change: "Live tracking", trend: "right", color: "bg-slate-100 text-slate-500" },
   ];
 
+  // Mathematically accurate breakdown summing to total Sent
   const dynamicPieData = [
-    { name: "Delivered", value: stats.delivered, color: "#3B82F6" },
-    { name: "Opened", value: stats.opened, color: "#8B5CF6" },
     { name: "Clicked", value: stats.clicked, color: "#F59E0B" },
-    { name: "Failed", value: Math.max(0, stats.sent - stats.delivered), color: "#F87171" },
+    { name: "Opened (Unclicked)", value: Math.max(0, stats.opened - stats.clicked), color: "#8B5CF6" },
+    { name: "Delivered (Unopened)", value: Math.max(0, stats.delivered - stats.opened), color: "#3B82F6" },
+    { name: "Failed", value: stats.failed, color: "#F87171" },
+    { name: "Sent (Pending)", value: Math.max(0, stats.sent - stats.delivered - stats.failed), color: "#94A3B8" },
   ];
 
   // We only show data if there's actual data, otherwise the pie chart might crash if all values are 0
