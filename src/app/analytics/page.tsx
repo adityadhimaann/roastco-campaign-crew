@@ -123,6 +123,8 @@ export default function AnalyticsPage() {
                 <Line type="monotone" dataKey="Sent" stroke="#94A3B8" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
                 <Line type="monotone" dataKey="Delivered" stroke="#3B82F6" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
                 <Line type="monotone" dataKey="Opened" stroke="#8B5CF6" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="Clicked" stroke="#F59E0B" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="Failed" stroke="#F87171" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

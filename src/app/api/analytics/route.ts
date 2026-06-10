@@ -46,7 +46,9 @@ export async function GET() {
         day: d.toLocaleDateString('en-US', { weekday: 'short' }),
         Sent: 0, 
         Delivered: 0, 
-        Opened: 0 
+        Opened: 0,
+        Clicked: 0,
+        Failed: 0
       };
     });
 
@@ -56,8 +58,10 @@ export async function GET() {
       const dayData = last7Days.find(d => d.dateString === dateStr);
       if (dayData) {
         dayData.Sent++;
+        if (m.status === 'failed') dayData.Failed++;
         if (m.delivered_at) dayData.Delivered++;
         if (m.opened_at) dayData.Opened++;
+        if (m.clicked_at) dayData.Clicked++;
       }
     });
 
