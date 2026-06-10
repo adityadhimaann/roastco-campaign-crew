@@ -69,13 +69,11 @@ export default function AnalyticsPage() {
     { label: "Failed", value: stats.failed.toString(), change: "Live tracking", trend: "right", color: "bg-slate-100 text-slate-500" },
   ];
 
-  // Mathematically accurate breakdown summing to total Sent
   const dynamicPieData = [
+    { name: "Delivered", value: stats.delivered, color: "#3B82F6" },
+    { name: "Opened", value: stats.opened, color: "#8B5CF6" },
     { name: "Clicked", value: stats.clicked, color: "#F59E0B" },
-    { name: "Opened (Unclicked)", value: Math.max(0, stats.opened - stats.clicked), color: "#8B5CF6" },
-    { name: "Delivered (Unopened)", value: Math.max(0, stats.delivered - stats.opened), color: "#3B82F6" },
     { name: "Failed", value: stats.failed, color: "#F87171" },
-    { name: "Sent (Pending)", value: Math.max(0, stats.sent - stats.delivered - stats.failed), color: "#94A3B8" },
   ];
 
   // We only show data if there's actual data, otherwise the pie chart might crash if all values are 0
