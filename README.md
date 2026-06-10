@@ -2,7 +2,7 @@
 
 An intelligent, decoupled Mini CRM built to help brands orchestrate, personalize, and track marketing campaigns. Instead of building segments manually, this CRM features an **AI Campaign Agent** that understands natural language goals, automatically segments audiences, and drafts highly personalized messaging.
 
-This repository serves as the core CRM server. It operates in tandem with an isolated **[Channel Service](../channel-service)** which acts as a mock delivery network (similar to Twilio or SendGrid).
+This repository serves as the core CRM server. It operates in tandem with an isolated **[Channel Service](https://channel-service-cxvh.onrender.com)** which acts as a mock delivery network (similar to Twilio or SendGrid).
 
 ---
 
