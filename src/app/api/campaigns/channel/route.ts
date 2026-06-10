@@ -5,10 +5,6 @@ export async function POST(req: Request) {
   try {
     const { campaignId, channel } = await req.json();
     
-    // Update campaign
-    const { error: campError } = await supabase.from('campaigns').update({ channel }).eq('id', campaignId);
-    if (campError) throw campError;
-    
     // Update all associated draft messages
     const { error: msgError } = await supabase.from('messages').update({ channel }).eq('campaign_id', campaignId).eq('status', 'pending');
     if (msgError) throw msgError;
