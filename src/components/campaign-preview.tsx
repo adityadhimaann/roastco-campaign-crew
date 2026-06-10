@@ -1,6 +1,6 @@
 import { Users, MessageCircle, Send, Pencil } from "lucide-react";
 
-export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any, onSend: (id: string) => void, isSending: boolean }) {
+export function CampaignPreview({ campaign, onSend, isSending, onChannelChange }: { campaign: any, onSend: (id: string) => void, isSending: boolean, onChannelChange?: (id: string, channel: string) => void }) {
   if (!campaign) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col items-center justify-center p-10 min-h-[400px]">
@@ -83,24 +83,33 @@ export function CampaignPreview({ campaign, onSend, isSending }: { campaign: any
         <div>
           <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">Channel</div>
           <div className="mt-2 flex gap-2">
-            <button className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+            <button 
+              onClick={() => isDraft && onChannelChange && onChannelChange(campaign.id, 'whatsapp')}
+              disabled={!isDraft}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${isDraft ? 'cursor-pointer hover:shadow-sm hover:-translate-y-0.5' : 'cursor-default'} ${
               campaign.channel?.toLowerCase() === 'whatsapp' 
                 ? 'bg-[#25D366]/10 text-[#128C7E] border-[#25D366]/30' 
-                : 'bg-slate-50 text-slate-400 border-slate-200'
+                : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
             }`}>
               WhatsApp
             </button>
-            <button className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+            <button 
+              onClick={() => isDraft && onChannelChange && onChannelChange(campaign.id, 'sms')}
+              disabled={!isDraft}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${isDraft ? 'cursor-pointer hover:shadow-sm hover:-translate-y-0.5' : 'cursor-default'} ${
               campaign.channel?.toLowerCase() === 'sms' 
                 ? 'bg-blue-50 text-blue-600 border-blue-200' 
-                : 'bg-slate-50 text-slate-400 border-slate-200'
+                : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
             }`}>
               SMS
             </button>
-            <button className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+            <button 
+              onClick={() => isDraft && onChannelChange && onChannelChange(campaign.id, 'email')}
+              disabled={!isDraft}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${isDraft ? 'cursor-pointer hover:shadow-sm hover:-translate-y-0.5' : 'cursor-default'} ${
               campaign.channel?.toLowerCase() === 'email' 
                 ? 'bg-orange-50 text-orange-600 border-orange-200' 
-                : 'bg-slate-50 text-slate-400 border-slate-200'
+                : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
             }`}>
               Email
             </button>

@@ -173,6 +173,25 @@ export default function CampaignsPage() {
     }
   };
 
+  const handleChannelChange = async (campaignId: string, channel: string) => {
+    try {
+      // Optimistically update the UI
+      setRecentCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, channel } : c));
+      
+      const res = await fetch('/api/campaigns/channel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaignId, channel })
+      });
+      if (!res.ok) throw new Error("Failed to update channel");
+      toast.success(`Channel switched to ${channel.toUpperCase()}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update channel");
+      fetchCampaigns(); // Revert on failure
+    }
+  };
+
   const currentCampaign = recentCampaigns[0];
 
   return (
@@ -187,8 +206,10 @@ export default function CampaignsPage() {
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[600px]">
           {/* Chat Box (LEFT) */}
-          <div className="lg:col-span-3 relative h-[600px] lg:h-auto">
-            <div className="absolute inset-0 bg-white rounded-xl border-2 border-slate-900 shadow-md flex flex-col overflow-hidden">
+          <div className="lg:col-span-3 relative h-[600px] lg:h-auto group">
+            {/* Animated Dark Border */}
+            <div className="absolute -inset-[2px] bg-gradient-to-r from-slate-900 via-slate-600 to-slate-900 rounded-xl blur-sm opacity-20 group-hover:opacity-40 animate-pulse transition duration-1000 -z-10" />
+            <div className="absolute inset-0 bg-white rounded-xl border-2 border-slate-900 shadow-md flex flex-col overflow-hidden z-0">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <div className="h-8 w-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
@@ -246,6 +267,7 @@ export default function CampaignsPage() {
               campaign={currentCampaign} 
               onSend={handleSendCampaign}
               isSending={isSending}
+              onChannelChange={handleChannelChange}
             />
           </div>
         </div>
