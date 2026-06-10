@@ -1,86 +1,81 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI, FunctionDeclaration, SchemaType } from '@google/generative-ai';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-const queryCustomersDeclaration = {
-  type: 'function' as const,
-  function: {
-    name: 'query_customers',
-    description: 'Query customers based on filters like days since last order, total spent, city, tags',
-    parameters: {
-      type: 'object',
-      properties: {
-        days_since_order: { type: 'number', description: 'Minimum days since last order' },
-        min_spent: { type: 'number', description: 'Minimum total amount spent' },
-        max_spent: { type: 'number', description: 'Maximum total amount spent' },
-        city: { type: 'string', description: 'Filter by city' },
-        name: { type: 'string', description: 'Filter by customer name' },
-        tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags' },
-        min_orders: { type: 'number', description: 'Minimum number of orders' },
-        max_orders: { type: 'number', description: 'Maximum number of orders' },
-        exact_orders: { type: 'number', description: 'Exact number of orders' }
-      }
+const queryCustomersDeclaration: FunctionDeclaration = {
+  name: 'query_customers',
+  description: 'Query customers based on filters like days since last order, total spent, city, tags',
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      days_since_order: { type: SchemaType.NUMBER, description: 'Minimum days since last order' },
+      min_spent: { type: SchemaType.NUMBER, description: 'Minimum total amount spent' },
+      max_spent: { type: SchemaType.NUMBER, description: 'Maximum total amount spent' },
+      city: { type: SchemaType.STRING, description: 'Filter by city' },
+      name: { type: SchemaType.STRING, description: 'Filter by customer name' },
+      tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING }, description: 'Filter by tags' },
+      min_orders: { type: SchemaType.NUMBER, description: 'Minimum number of orders' },
+      max_orders: { type: SchemaType.NUMBER, description: 'Maximum number of orders' },
+      exact_orders: { type: SchemaType.NUMBER, description: 'Exact number of orders' }
     }
   }
 };
 
-const createCampaignDeclaration = {
-  type: 'function' as const,
-  function: {
-    name: 'create_campaign',
-    description: 'Create a draft campaign in the system so the user can preview it',
-    parameters: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        goal: { type: 'string' },
-        segment_filters: { type: 'object', additionalProperties: true },
-        message_template: { type: 'string', description: 'Message with {{name}} placeholder' },
-        channel: { type: 'string', description: 'One of: whatsapp, sms, email' }
+const createCampaignDeclaration: FunctionDeclaration = {
+  name: 'create_campaign',
+  description: 'Create a draft campaign in the system so the user can preview it',
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      name: { type: SchemaType.STRING },
+      goal: { type: SchemaType.STRING },
+      segment_filters: { 
+        type: SchemaType.OBJECT, 
+        description: 'Segment filters used to find customers',
+        properties: {
+          days_since_order: { type: SchemaType.NUMBER },
+          min_spent: { type: SchemaType.NUMBER },
+          max_spent: { type: SchemaType.NUMBER },
+          city: { type: SchemaType.STRING },
+          name: { type: SchemaType.STRING },
+          tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          min_orders: { type: SchemaType.NUMBER },
+          max_orders: { type: SchemaType.NUMBER },
+          exact_orders: { type: SchemaType.NUMBER }
+        }
       },
-      required: ['name', 'goal', 'message_template', 'channel']
-    }
+      message_template: { type: SchemaType.STRING, description: 'Message with {{name}} placeholder' },
+      channel: { type: SchemaType.STRING, description: 'One of: whatsapp, sms, email' }
+    },
+    required: ['name', 'goal', 'message_template', 'channel']
   }
 };
 
-const sendCampaignDeclaration = {
-  type: 'function' as const,
-  function: {
-    name: 'send_campaign',
-    description: 'Send a previously drafted campaign after user confirms',
-    parameters: {
-      type: 'object',
-      properties: {
-        campaign_id: { type: 'string' }
-      },
-      required: ['campaign_id']
-    }
+const sendCampaignDeclaration: FunctionDeclaration = {
+  name: 'send_campaign',
+  description: 'Send a previously drafted campaign after user confirms',
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      campaign_id: { type: SchemaType.STRING }
+    },
+    required: ['campaign_id']
   }
 };
 
-const getCampaignStatsDeclaration = {
-  type: 'function' as const,
-  function: {
-    name: 'get_campaign_stats',
-    description: 'Get live stats for a specific campaign',
-    parameters: {
-      type: 'object',
-      properties: {
-        campaign_id: { type: 'string' }
-      },
-      required: ['campaign_id']
-    }
+const getCampaignStatsDeclaration: FunctionDeclaration = {
+  name: 'get_campaign_stats',
+  description: 'Get live stats for a specific campaign',
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      campaign_id: { type: SchemaType.STRING }
+    },
+    required: ['campaign_id']
   }
 };
-
-const tools = [
-  queryCustomersDeclaration,
-  createCampaignDeclaration,
-  sendCampaignDeclaration,
-  getCampaignStatsDeclaration
-];
 
 async function getFilteredCustomers(filters: any) {
   const { data: orders } = await supabase.from('orders').select('customer_id, ordered_at, amount');
@@ -180,12 +175,13 @@ export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
-const systemPrompt = `You are a CRM campaign agent for Roast & Co., a coffee chain brand in India.
+    const systemPrompt = `You are a CRM campaign agent for Roast & Co., a coffee chain brand in India.
 You help marketers reach their customers through targeted campaigns.
 
 When a marketer describes a goal:
 1. Use query_customers to find the right audience.
-2. IMMEDIATELY use the create_campaign tool to generate a draft of the personalized message in the system.
+2. IMMEDIATELY use the create_campaign tool to generate a draft of the personalized message in the system. NEVER ask for permission before creating the draft.
+   - IMPORTANT: The message_template must NOT include a "Subject:" line or title. Start directly with the greeting.
 3. Once the draft is created, respond to the user in a clearly structured, friendly way using paragraphs and bullet points.
 
 FORMATTING RULES for your response:
@@ -200,68 +196,75 @@ FORMATTING RULES for your response:
 Keep responses concise and conversational.
 Current date: ${new Date().toLocaleDateString('en-IN')}`;
 
-    // Convert the incoming UI messages ({ role: 'user'|'assistant', content: string }) 
-    // to OpenAI format
-    const formattedHistory = messages.map((msg: any) => ({
-      role: msg.role === 'assistant' ? 'assistant' : 'user',
-      content: msg.content
+    // Convert history format to Gemini format, enforcing strict alternating 'user'/'model' roles
+    let rawHistory = messages.slice(0, -1).map((msg: any) => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content || "" }]
     }));
 
-    const currentMessages: any[] = [
-      { role: 'system', content: systemPrompt },
-      ...formattedHistory
-    ];
-
-    let debugLogs: any[] = [];
+    let history: any[] = [];
+    for (const msg of rawHistory) {
+      if (history.length === 0) {
+        if (msg.role === 'user') history.push(msg);
+      } else {
+        if (history[history.length - 1].role !== msg.role) {
+          history.push(msg);
+        } else {
+          // If same role, append text to the previous message to maintain alternation
+          history[history.length - 1].parts[0].text += "\n" + msg.parts[0].text;
+        }
+      }
+    }
     
-    // Initial call
-    let response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: currentMessages,
-      tools: tools
+    const lastMessage = messages[messages.length - 1].content;
+
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      systemInstruction: systemPrompt,
+      tools: [{
+        functionDeclarations: [
+          queryCustomersDeclaration,
+          createCampaignDeclaration,
+          sendCampaignDeclaration,
+          getCampaignStatsDeclaration
+        ]
+      }]
     });
 
-    let message = response.choices[0].message;
+    const chat = model.startChat({ history });
 
-    // Loop to handle potential multiple tool calls
-    while (message.tool_calls && message.tool_calls.length > 0) {
-      // Append the assistant's tool call request to the messages array
-      currentMessages.push(message);
+    let debugLogs: any[] = [];
+    let responseText = "";
 
-      for (const rawCall of message.tool_calls) {
-        const call = rawCall as any;
-        debugLogs.push({ event: 'TOOL CALL', name: call.function.name, args: call.function.arguments });
+    // Send the user's message
+    let result = await chat.sendMessage(lastMessage);
+    let calls = result.response.functionCalls();
+
+    while (calls && calls.length > 0) {
+      const functionResponses = [];
+      
+      for (const call of calls) {
+        debugLogs.push({ event: 'TOOL CALL', name: call.name, args: call.args });
         
-        let parsedArgs = {};
-        try {
-          parsedArgs = JSON.parse(call.function.arguments);
-        } catch(e) {}
-        
-        const toolResult = await executeTool(call.function.name, parsedArgs);
+        const toolResult = await executeTool(call.name, call.args);
         debugLogs.push({ event: 'TOOL RESULT', result: toolResult });
         
-        // Append the tool result back into the history
-        currentMessages.push({
-          role: 'tool',
-          tool_call_id: call.id,
-          content: JSON.stringify(toolResult)
+        functionResponses.push({
+          functionResponse: {
+            name: call.name,
+            response: toolResult as any
+          }
         });
       }
 
-      // Call the model again with the tool results
-      response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: currentMessages,
-        tools: tools
-      });
-      message = response.choices[0].message;
-      debugLogs.push({ event: 'MODEL AFTER TOOL', text: message.content });
+      // Send tool results back to the model
+      result = await chat.sendMessage(functionResponses);
+      calls = result.response.functionCalls();
     }
 
-    const responseText = message.content || "";
+    responseText = result.response.text();
     debugLogs.push({ event: 'FINAL TEXT', text: responseText });
     
-    // We append only the newest final text back for the frontend
     return NextResponse.json({ 
       message: responseText, 
       updatedMessages: [...messages, { role: 'assistant', content: responseText }],
