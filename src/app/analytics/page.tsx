@@ -162,11 +162,11 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+        <div className="px-5 py-4 border-b border-slate-100 shrink-0">
           <h3 className="font-semibold text-slate-900 text-sm">Recent Campaigns</h3>
         </div>
-        <div className="max-h-[300px] overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <table className="w-full text-sm relative">
             <thead className="sticky top-0 bg-slate-50 shadow-sm z-10">
               <tr className="text-left text-xs uppercase tracking-wide text-slate-500">

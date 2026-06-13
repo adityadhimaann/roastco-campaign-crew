@@ -5,9 +5,30 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const { data: messages, error: messagesError } = await supabase
-      .from('messages')
-      .select('status, sent_at, delivered_at, opened_at, clicked_at, campaign_id');
+    let messages: any[] = [];
+    let from = 0;
+    const limit = 1000;
+    let messagesError = null;
+
+    while (true) {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('status, sent_at, delivered_at, opened_at, clicked_at, campaign_id')
+        .range(from, from + limit - 1);
+
+      if (error) {
+        messagesError = error;
+        break;
+      }
+
+      if (data) {
+        messages = messages.concat(data);
+        if (data.length < limit) break;
+        from += limit;
+      } else {
+        break;
+      }
+    }
 
     if (messagesError) {
       console.error("Supabase Analytics Messages Error:", messagesError);

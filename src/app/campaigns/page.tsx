@@ -5,6 +5,7 @@ import {
   Sparkles,
   Send,
   CheckCircle2,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatMessage, Msg } from "@/components/chat-message";
@@ -145,7 +146,7 @@ export default function CampaignsPage() {
         ...newMessages,
         {
           from: "ai",
-          text: "Sorry, I couldn't connect to the server.",
+          text: "Sorry, an error occurred. If this is due to too many requests, please wait 1 minute before trying again.",
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         }
       ]);
@@ -220,9 +221,22 @@ export default function CampaignsPage() {
                     <div className="text-xs text-slate-500">Powered by AI</div>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online
-                </span>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => updateMessages([{
+                      from: "ai",
+                      text: "Hi! I'm your campaign agent. Describe who you want to reach, and I'll draft the campaign for you.",
+                      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    }])}
+                    className="text-slate-400 hover:text-red-500 transition-colors"
+                    title="Clear Chat"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online
+                  </span>
+                </div>
               </div>
 
               <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
@@ -256,6 +270,9 @@ export default function CampaignsPage() {
                   >
                     <Send className="h-3.5 w-3.5" /> Send
                   </button>
+                </div>
+                <div className="text-[10px] text-slate-400 text-center mt-2 px-2">
+                  Disclaimer: If the AI returns an error due to too many requests, please wait 1 minute before retrying.
                 </div>
               </div>
             </div>
