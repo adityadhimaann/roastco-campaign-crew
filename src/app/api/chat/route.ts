@@ -78,33 +78,35 @@ const getCampaignStatsDeclaration: FunctionDeclaration = {
 };
 
 async function getFilteredCustomers(filters: any) {
-  const { data: orders } = await supabase.from('orders').select('customer_id, ordered_at, amount');
-  const { data: customers } = await supabase.from('customers').select('*');
+  // FIX #1: Push computation to the Database (SQL) instead of downloading all rows into Next.js RAM
+  // NOTE: This relies on 'total_spent', 'days_since_order', and 'order_count' existing in the database.
+  
+  let query = supabase.from('customers').select('*');
 
-  const enriched = customers!.map(c => {
-    const customerOrders = orders!.filter(o => o.customer_id === c.id);
-    const totalSpent = customerOrders.reduce((sum, o) => sum + o.amount, 0);
-    const lastOrder = customerOrders.sort((a, b) =>
-      new Date(b.ordered_at).getTime() - new Date(a.ordered_at).getTime()
-    )[0];
-    const daysSince = lastOrder
-      ? Math.floor((Date.now() - new Date(lastOrder.ordered_at).getTime()) / 86400000)
-      : 999;
+  // We use Supabase native query builders which map directly to SQL WHERE clauses
+  if (filters.days_since_order !== undefined) query = query.gte('days_since_order', filters.days_since_order);
+  if (filters.min_spent !== undefined) query = query.gte('total_spent', filters.min_spent);
+  if (filters.max_spent !== undefined) query = query.lte('total_spent', filters.max_spent);
+  if (filters.city !== undefined) query = query.eq('city', filters.city);
+  if (filters.name !== undefined) query = query.ilike('name', `%${filters.name}%`);
+  if (filters.min_orders !== undefined) query = query.gte('order_count', filters.min_orders);
+  if (filters.max_orders !== undefined) query = query.lte('order_count', filters.max_orders);
+  if (filters.exact_orders !== undefined) query = query.eq('order_count', filters.exact_orders);
 
-    return { ...c, totalSpent, daysSince, orderCount: customerOrders.length };
-  });
+  const { data: filtered, error } = await query;
+  
+  if (error) {
+    console.error("Supabase SQL Filter Error:", error);
+    return [];
+  }
 
-  let filtered = enriched;
-  if (filters.days_since_order !== undefined) filtered = filtered.filter(c => c.daysSince >= filters.days_since_order);
-  if (filters.min_spent !== undefined) filtered = filtered.filter(c => c.totalSpent >= filters.min_spent);
-  if (filters.max_spent !== undefined) filtered = filtered.filter(c => c.totalSpent <= filters.max_spent);
-  if (filters.city !== undefined) filtered = filtered.filter(c => c.city === filters.city);
-  if (filters.name !== undefined) filtered = filtered.filter(c => c.name.toLowerCase().includes(filters.name.toLowerCase()));
-  if (filters.min_orders !== undefined) filtered = filtered.filter(c => c.orderCount >= filters.min_orders);
-  if (filters.max_orders !== undefined) filtered = filtered.filter(c => c.orderCount <= filters.max_orders);
-  if (filters.exact_orders !== undefined) filtered = filtered.filter(c => c.orderCount === filters.exact_orders);
-
-  return filtered;
+  // Map the snake_case DB columns back to the camelCase format that the rest of executeTool expects
+  return filtered.map((c: any) => ({
+    ...c,
+    daysSince: c.days_since_order,
+    totalSpent: c.total_spent,
+    orderCount: c.order_count
+  }));
 }
 
 async function executeTool(name: string, input: any) {
