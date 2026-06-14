@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+
+  // pagination - receiving message in chunks of 1000
   try {
     let messages: any[] = [];
     let from = 0;
