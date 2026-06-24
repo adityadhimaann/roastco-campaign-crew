@@ -196,7 +196,7 @@ export default function CampaignsPage() {
   const currentCampaign = recentCampaigns[0];
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Campaigns</h1>
         <p className="text-sm text-slate-500 mt-1">
@@ -205,9 +205,9 @@ export default function CampaignsPage() {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[500px] md:min-h-[600px]">
           {/* Chat Box (LEFT) */}
-          <div className="lg:col-span-3 relative h-[600px] lg:h-auto group">
+          <div className="lg:col-span-3 relative h-[500px] lg:h-auto group">
             {/* Animated Dark Border */}
             <div className="absolute -inset-[2px] bg-gradient-to-r from-slate-900 via-slate-600 to-slate-900 rounded-xl blur-sm opacity-20 group-hover:opacity-40 animate-pulse transition duration-1000 -z-10" />
             <div className="absolute inset-0 bg-white rounded-xl border-2 border-slate-900 shadow-md flex flex-col overflow-hidden z-0">

@@ -80,8 +80,8 @@ export default function AnalyticsPage() {
   const hasData = stats.sent > 0;
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Analytics Dashboard</h1>
           <p className="text-sm text-slate-500 mt-1">Track campaign performance across channels.</p>
@@ -166,7 +166,7 @@ export default function AnalyticsPage() {
         <div className="px-5 py-4 border-b border-slate-100 shrink-0">
           <h3 className="font-semibold text-slate-900 text-sm">Recent Campaigns</h3>
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-auto">
           <table className="w-full text-sm relative">
             <thead className="sticky top-0 bg-slate-50 shadow-sm z-10">
               <tr className="text-left text-xs uppercase tracking-wide text-slate-500">

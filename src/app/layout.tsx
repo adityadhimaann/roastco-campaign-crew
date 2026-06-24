@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased bg-background text-foreground flex min-h-screen">
+      <body className="antialiased bg-background text-foreground flex flex-col md:flex-row min-h-screen">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {children}

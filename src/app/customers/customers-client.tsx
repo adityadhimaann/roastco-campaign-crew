@@ -50,20 +50,20 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: any[] 
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-start justify-between gap-4 mb-6">
+    <div className="p-4 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Customer Directory</h1>
           <p className="text-sm text-slate-500 mt-1">{customers.length} customers</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-none">
             <Search className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Live search anywhere..."
-              className="pl-9 pr-3 py-2 w-72 text-sm bg-white border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-primary/30"
+              className="pl-9 pr-3 py-2 w-full md:w-72 text-sm bg-white border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
           <ImportCsvButton />
@@ -87,7 +87,7 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: any[] 
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-y-auto h-[calc(100vh-220px)]">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-auto h-[calc(100vh-220px)]">
         <table className="w-full text-sm relative">
           <thead className="sticky top-0 z-10 bg-slate-50 shadow-[0_1px_0_0_#e2e8f0]">
             <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
