@@ -81,7 +81,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 md:mb-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Analytics Dashboard</h1>
           <p className="text-sm text-slate-500 mt-1">Track campaign performance across channels.</p>
@@ -92,21 +92,22 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        {metrics.map((m) => (
-          <MetricCard
-            key={m.label}
-            label={m.label}
-            value={m.value}
-            change={m.change}
-            trend={m.trend as "up" | "right"}
-            color={m.color}
-          />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4 md:mb-6">
+        {metrics.map((m, i) => (
+          <div key={m.label} className={cn(i === 4 ? "col-span-2 md:col-span-2 lg:col-span-1" : "")}>
+            <MetricCard
+              label={m.label}
+              value={m.value}
+              change={m.change}
+              trend={m.trend as "up" | "right"}
+              color={m.color}
+            />
+          </div>
         ))}
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6 mb-4 md:mb-6">
         <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm p-5">
           <h3 className="font-semibold text-slate-900 text-sm mb-4">Campaign Performance Over Time</h3>
           <div className="h-72">
@@ -162,7 +163,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[350px] md:h-[400px]">
         <div className="px-5 py-4 border-b border-slate-100 shrink-0">
           <h3 className="font-semibold text-slate-900 text-sm">Recent Campaigns</h3>
         </div>
