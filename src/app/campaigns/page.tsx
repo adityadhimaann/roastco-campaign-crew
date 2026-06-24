@@ -196,21 +196,21 @@ export default function CampaignsPage() {
   const currentCampaign = recentCampaigns[0];
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mb-6">
+    <div className="p-0 md:p-8">
+      <div className="mb-6 hidden md:block">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Campaigns</h1>
         <p className="text-sm text-slate-500 mt-1">
           Describe your campaign in plain English. Your AI agent does the rest.
         </p>
       </div>
 
-      <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[500px] md:min-h-[600px]">
+      <div className="flex flex-col gap-0 md:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 md:gap-6 md:min-h-[600px]">
           {/* Chat Box (LEFT) */}
-          <div className="lg:col-span-3 relative h-[500px] lg:h-auto group">
+          <div className="lg:col-span-3 relative h-[calc(100vh-129px)] md:h-[500px] lg:h-auto group">
             {/* Animated Dark Border */}
-            <div className="absolute -inset-[2px] bg-gradient-to-r from-slate-900 via-slate-600 to-slate-900 rounded-xl blur-sm opacity-20 group-hover:opacity-40 animate-pulse transition duration-1000 -z-10" />
-            <div className="absolute inset-0 bg-white rounded-xl border-2 border-slate-900 shadow-md flex flex-col overflow-hidden z-0">
+            <div className="hidden md:block absolute -inset-[2px] bg-gradient-to-r from-slate-900 via-slate-600 to-slate-900 rounded-xl blur-sm opacity-20 group-hover:opacity-40 animate-pulse transition duration-1000 -z-10" />
+            <div className="absolute inset-0 bg-white md:rounded-xl md:border-2 border-y border-slate-200 md:border-slate-900 shadow-sm md:shadow-md flex flex-col overflow-hidden z-0">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <div className="h-8 w-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
@@ -279,7 +279,7 @@ export default function CampaignsPage() {
           </div>
 
           {/* RIGHT COLUMN: Preview */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 px-4 py-8 md:p-0 bg-slate-50 md:bg-transparent">
             <CampaignPreview 
               campaign={currentCampaign} 
               onSend={handleSendCampaign}
@@ -290,7 +290,7 @@ export default function CampaignsPage() {
         </div>
 
         {/* BOTTOM ROW: Recent Campaigns (BROAD) */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-white md:rounded-xl border-y md:border border-slate-200 shadow-sm mb-4 md:mb-0">
           <div className="px-5 py-4 border-b border-slate-100">
             <h3 className="font-semibold text-slate-900 text-sm">Recent Campaigns</h3>
           </div>
